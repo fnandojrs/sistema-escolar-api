@@ -74,6 +74,74 @@ app.post('/fornecedor', async (req, res) => {
   }
 });
 
+app.post('/aluno', async (req, res) => {
+  try {
+
+    const {
+      nome,
+      cpf,
+      rg,
+      sexo,
+      nomeMae,
+      telMae,
+      nomePai,
+      telPai,
+      medicamento,
+      observacao,
+      rua,
+      bairro,
+      numero,
+      cep,
+      complemento
+    } = req.body;
+
+    await pool.query(`
+      INSERT INTO aluno (
+        nome,
+        cpf,
+        rg,
+        sexo,
+        nome_mae,
+        tel_mae,
+        nome_pai,
+        tel_pai,
+        medicamento,
+        observacao,
+        rua,
+        bairro,
+        numero,
+        cep,
+        complemento
+      )
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    `, [
+      nome,
+      cpf,
+      rg,
+      sexo,
+      nomeMae,
+      telMae,
+      nomePai,
+      telPai,
+      medicamento,
+      observacao,
+      rua,
+      bairro,
+      numero,
+      cep,
+      complemento
+    ]);
+
+    res.json({ sucesso: true });
+
+  } catch (erro) {
+
+    console.error(erro);
+    res.status(500).json({ erro: erro.message });
+
+  }
+});
+
 const PORT = process.env.PORT || 3000;
 
 app.listen(PORT, () => {
