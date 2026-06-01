@@ -142,6 +142,68 @@ app.post('/aluno', async (req, res) => {
   }
 });
 
+app.post('/professor', async (req, res) => {
+  try {
+
+    const {
+      nome,
+      cpf,
+      rg,
+      sexo,
+      telefone,
+      email,
+      disciplina,
+      formacao,
+      rua,
+      bairro,
+      numero,
+      cep,
+      complemento
+    } = req.body;
+
+    await pool.query(`
+      INSERT INTO professor (
+        nome,
+        cpf,
+        rg,
+        sexo,
+        telefone,
+        email,
+        disciplina,
+        formacao,
+        rua,
+        bairro,
+        numero,
+        cep,
+        complemento
+      )
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    `, [
+      nome,
+      cpf,
+      rg,
+      sexo,
+      telefone,
+      email,
+      disciplina,
+      formacao,
+      rua,
+      bairro,
+      numero,
+      cep,
+      complemento
+    ]);
+
+    res.json({ sucesso: true });
+
+  } catch (erro) {
+
+    console.error(erro);
+    res.status(500).json({ erro: erro.message });
+
+  }
+});
+
 const PORT = process.env.PORT || 3000;
 
 app.listen(PORT, () => {
