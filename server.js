@@ -224,26 +224,6 @@ app.get('/categoria', async (req, res) => {
 
   }
 });
-app.get('/fornecedor', async (req, res) => {
-  try {
-
-    const [dados] = await pool.query(`
-      SELECT
-        id,
-        nome
-      FROM categoria
-      ORDER BY nome
-    `);
-
-    res.json(dados);
-
-  } catch (erro) {
-
-    console.error(erro);
-    res.status(500).json({ erro: erro.message });
-
-  }
-});
 
 app.get('/fornecedor', async (req, res) => {
   try {
