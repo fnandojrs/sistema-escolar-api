@@ -204,6 +204,27 @@ app.post('/professor', async (req, res) => {
   }
 });
 
+app.get('/categoria', async (req, res) => {
+  try {
+
+    const [dados] = await pool.query(`
+      SELECT
+        id,
+        nome
+      FROM categoria
+      ORDER BY nome
+    `);
+
+    res.json(dados);
+
+  } catch (erro) {
+
+    console.error(erro);
+    res.status(500).json({ erro: erro.message });
+
+  }
+});
+
 const PORT = process.env.PORT || 3000;
 
 app.listen(PORT, () => {
