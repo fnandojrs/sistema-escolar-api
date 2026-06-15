@@ -17,7 +17,6 @@ const pool = mysql.createPool({
 
 app.post('/fornecedor', async (req, res) => {
   try {
-
     const {
       empresa,
       cnpj,
@@ -65,18 +64,14 @@ app.post('/fornecedor', async (req, res) => {
     ]);
 
     res.json({ sucesso: true });
-
   } catch (erro) {
-
     console.error(erro);
     res.status(500).json({ erro: erro.message });
-
   }
 });
 
 app.post('/aluno', async (req, res) => {
   try {
-
     const {
       nome,
       cpf,
@@ -133,18 +128,14 @@ app.post('/aluno', async (req, res) => {
     ]);
 
     res.json({ sucesso: true });
-
   } catch (erro) {
-
     console.error(erro);
     res.status(500).json({ erro: erro.message });
-
   }
 });
 
 app.post('/professor', async (req, res) => {
   try {
-
     const {
       nome,
       cpf,
@@ -195,18 +186,14 @@ app.post('/professor', async (req, res) => {
     ]);
 
     res.json({ sucesso: true });
-
   } catch (erro) {
-
     console.error(erro);
     res.status(500).json({ erro: erro.message });
-
   }
 });
 
 app.get('/categoria', async (req, res) => {
   try {
-
     const [dados] = await pool.query(`
       SELECT
         id,
@@ -214,20 +201,15 @@ app.get('/categoria', async (req, res) => {
       FROM categoria
       ORDER BY nome
     `);
-
     res.json(dados);
-
   } catch (erro) {
-
     console.error(erro);
     res.status(500).json({ erro: erro.message });
-
   }
 });
 
 app.get('/fornecedor', async (req, res) => {
   try {
-
     const [dados] = await pool.query(`
       SELECT
         id,
@@ -235,20 +217,15 @@ app.get('/fornecedor', async (req, res) => {
       FROM fornecedor
       ORDER BY empresa
     `);
-
     res.json(dados);
-
   } catch (erro) {
-
     console.error(erro);
     res.status(500).json({ erro: erro.message });
-
   }
 });
 
 app.post('/contas-pagar', async (req, res) => {
   try {
-
     const {
       fornecedor_id,
       categoria_id,
@@ -298,24 +275,15 @@ app.post('/contas-pagar', async (req, res) => {
       codigo_boleto
     ]);
 
-    res.json({
-      sucesso: true
-    });
-
+    res.json({ sucesso: true });
   } catch (erro) {
-
     console.error(erro);
-
-    res.status(500).json({
-      erro: erro.message
-    });
-
+    res.status(500).json({ erro: erro.message });
   }
 });
 
 app.get('/contas-pagar', async (req, res) => {
   try {
-
     const [dados] = await pool.query(`
       SELECT
           cp.id,
@@ -334,17 +302,86 @@ app.get('/contas-pagar', async (req, res) => {
         ON c.id = cp.categoria_id
       ORDER BY cp.id DESC
     `);
-
     res.json(dados);
-
   } catch (erro) {
-
     console.error(erro);
+    res.status(500).json({ erro: erro.message });
+  }
+});
 
-    res.status(500).json({
-      erro: erro.message
-    });
+/* ==================================================================
+  NOVA ROTA: ATUALIZAR STATUS DE PAGAMENTO DA CONTA (PUT)
+  ==================================================================
+*/
+app.put('/contas-pagar/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    
+    // Captura os dados enviados pelo Angular vindos do formulário modal de pagamento
+    const { 
+      status, 
+      forma_pagamento, 
+      formaPagamento, 
+      data_pagamento, 
+      dataPagamento, 
+      valor_pago, 
+      valorPago 
+    } = req.body;
 
+    // Garante que usará uma chave válida caso venha em camelCase ou snake_case
+    const finalStatus = status || 'Pago';
+    const finalForma = forma_pagamento || formaPagamento || 'PIX';
+    const finalData = data_pagamento || dataPagamento || null;
+    const finalValor = valor_pago || valorPago || 0;
+
+    /*
+      NOTA SOBRE O SEU BANCO DE DADOS:
+      A query abaixo tenta salvar também a forma de pagamento, a data e o valor pago.
+      Se essas colunas adicionais não existirem na sua tabela do MySQL, o banco dará um erro.
+      
+      Caso dê erro de coluna inexistente, use a query simplificada abaixo descomentando-a.
+    */
+    
+    // QUERY COMPLETA (Recomendada se você tiver esses campos na tabela):
+    await pool.query(`
+      UPDATE contas_pagar 
+      SET 
+        status = ?, 
+        forma_pagamento = ?, 
+        data_pagamento = ?, 
+        valor_pago = ?
+      WHERE id = ?
+    `, [finalStatus, finalForma, finalData, finalValor, id]);
+
+
+    // QUERY SIMPLIFICADA (Se o seu banco só tiver a coluna 'status'):
+    /*
+    await pool.query(`
+      UPDATE contas_pagar 
+      SET status = ?
+      WHERE id = ?
+    `, [finalStatus, id]);
+    */
+
+    res.json({ sucesso: true, mensagem: `Conta #${id} alterada para ${finalStatus} com sucesso!` });
+  } catch (erro) {
+    console.error(erro);
+    res.status(500).json({ erro: erro.message });
+  }
+});
+
+/* ==================================================================
+  ROTA ADICIONAL: EXCLUIR CONTA (DELETE)
+  ==================================================================
+*/
+app.delete('/contas-pagar/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    await pool.query('DELETE FROM contas_pagar WHERE id = ?', [id]);
+    res.json({ sucesso: true, mensagem: `Conta #${id} excluída com sucesso!` });
+  } catch (erro) {
+    console.error(erro);
+    res.status(500).json({ erro: erro.message });
   }
 });
 
