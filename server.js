@@ -246,6 +246,74 @@ app.get('/fornecedor', async (req, res) => {
   }
 });
 
+app.post('/contas-pagar', async (req, res) => {
+  try {
+
+    const {
+      fornecedor_id,
+      categoria_id,
+      descricao,
+      valor_total,
+      data_emissao,
+      data_vencimento,
+      status,
+      juros,
+      multa,
+      numero_parcela,
+      total_parcelas,
+      centro_custo,
+      codigo_boleto
+    } = req.body;
+
+    await pool.query(`
+      INSERT INTO contas_pagar (
+        fornecedor_id,
+        categoria_id,
+        descricao,
+        valor_total,
+        data_emissao,
+        data_vencimento,
+        status,
+        juros,
+        multa,
+        numero_parcela,
+        total_parcelas,
+        centro_custo,
+        codigo_boleto
+      )
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    `, [
+      fornecedor_id,
+      categoria_id,
+      descricao,
+      valor_total,
+      data_emissao,
+      data_vencimento,
+      status,
+      juros,
+      multa,
+      numero_parcela,
+      total_parcelas,
+      centro_custo,
+      codigo_boleto
+    ]);
+
+    res.json({
+      sucesso: true
+    });
+
+  } catch (erro) {
+
+    console.error(erro);
+
+    res.status(500).json({
+      erro: erro.message
+    });
+
+  }
+});
+
+
 const PORT = process.env.PORT || 3000;
 
 app.listen(PORT, () => {
