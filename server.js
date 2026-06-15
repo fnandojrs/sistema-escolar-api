@@ -313,6 +313,41 @@ app.post('/contas-pagar', async (req, res) => {
   }
 });
 
+app.get('/contas-pagar', async (req, res) => {
+  try {
+
+    const [dados] = await pool.query(`
+      SELECT
+          cp.id,
+          f.empresa AS fornecedor,
+          c.nome AS categoria,
+          cp.descricao,
+          cp.valor_total AS valorTotal,
+          cp.data_vencimento AS dataVencimento,
+          cp.status,
+          cp.numero_parcela AS numeroParcela,
+          cp.total_parcelas AS totalParcelas
+      FROM contas_pagar cp
+      INNER JOIN fornecedor f
+        ON f.id = cp.fornecedor_id
+      INNER JOIN categoria c
+        ON c.id = cp.categoria_id
+      ORDER BY cp.id DESC
+    `);
+
+    res.json(dados);
+
+  } catch (erro) {
+
+    console.error(erro);
+
+    res.status(500).json({
+      erro: erro.message
+    });
+
+  }
+});
+
 
 const PORT = process.env.PORT || 3000;
 
